@@ -4,6 +4,12 @@ import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
+import twitter4j.json.DataObjectFactory;
+
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 
 /**
  * <p>This is a StatusListener implementation to the Twitter Streaming API.<br>
@@ -14,6 +20,12 @@ import twitter4j.StatusListener;
  */
 public class TwitterListener implements StatusListener {
 
+	private DBCollection twitterCollection;
+
+	public TwitterListener(DB db) {
+		this.twitterCollection = db.getCollection("twitters");
+	}
+
 	@Override
 	public void onException(Exception exception) {
 		exception.printStackTrace();
@@ -22,6 +34,9 @@ public class TwitterListener implements StatusListener {
 	@Override
 	public void onStatus(Status status) {
 		System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+		String statusJson = DataObjectFactory.getRawJSON(status);
+		DBObject document = (DBObject) JSON.parse(statusJson);
+		twitterCollection.insert(document);
 	}
 
 	@Override

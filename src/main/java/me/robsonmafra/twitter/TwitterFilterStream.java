@@ -2,12 +2,15 @@ package me.robsonmafra.twitter;
 
 import java.util.Arrays;
 
+import me.robsonmafra.persistence.Mongo;
 import twitter4j.FilterQuery;
 import twitter4j.TwitterException;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
+
+import com.mongodb.DB;
 
 /**
  * <p>Responsible for start the streaming and create the filter query. <br>
@@ -37,7 +40,7 @@ public class TwitterFilterStream {
 			this.stop();
 			this.startStreaming();
 		} catch (TwitterException e) {
-			System.out.println("Fail to shutdown the stream "+ e);
+			System.out.println("Fail to start the twitter stream "+ e);
 			this.stop();
 		}
 	}
@@ -56,10 +59,12 @@ public class TwitterFilterStream {
 	}
 
 	private void startStreaming() throws TwitterException {
-		System.out.println("Start twitter streaming...");
+		System.out.println("Start twitter listener and query...");
+
+		DB db = Mongo.getDatabase();
 
 		twitterStream = new TwitterStreamFactory(buildConfiguration()).getInstance();
-		TwitterListener twitterListener = new TwitterListener();
+		TwitterListener twitterListener = new TwitterListener(db);
 		twitterStream.addListener(twitterListener);
 
 		FilterQuery query = new FilterQuery();
@@ -71,6 +76,7 @@ public class TwitterFilterStream {
 	private Configuration buildConfiguration() {
 		ConfigurationBuilder config = new ConfigurationBuilder();
 		config.setDebugEnabled(true)
+			.setJSONStoreEnabled(true)
 			.setOAuthConsumerKey(CONSUMER_KEY)
 			.setOAuthConsumerSecret(CONSUMER_SECRET)
 			.setOAuthAccessToken(ACCESS_TOKEN)
