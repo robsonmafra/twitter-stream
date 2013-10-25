@@ -1,0 +1,26 @@
+## java specific
+*.class
+*.jar
+/build/
+/bin/
+target/
+
+## Eclipse
+.project
+.metadata
+tmp/**
+tmp/**/*
+.classpath
+.loadpath
+.settings/
+
+## generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.svn
+*.swp
+*.out
+*.log
+*.tmp
+
