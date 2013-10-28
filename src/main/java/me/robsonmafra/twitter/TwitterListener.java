@@ -1,15 +1,14 @@
 package me.robsonmafra.twitter;
 
+import me.robsonmafra.solr.SolrUpdate;
+import me.robsonmafra.twitter.model.Tweet;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
-import twitter4j.json.DataObjectFactory;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 
 /**
  * <p>This is a StatusListener implementation to the Twitter Streaming API.<br>
@@ -34,9 +33,18 @@ public class TwitterListener implements StatusListener {
 	@Override
 	public void onStatus(Status status) {
 		System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
-		String statusJson = DataObjectFactory.getRawJSON(status);
-		DBObject document = (DBObject) JSON.parse(statusJson);
-		twitterCollection.insert(document);
+		Tweet tweet = new Tweet();
+		tweet.put("id",status.getId());
+		tweet.put("user_id",status.getUser().getId());
+		tweet.put("username",status.getUser().getScreenName());
+		tweet.put("username_image_url",status.getUser().getProfileImageURL());
+		tweet.put("text",status.getText());
+		tweet.put("created_at",status.getCreatedAt());
+		tweet.put("in_reply_to_status_id",status.getInReplyToStatusId());
+		tweet.put("in_reply_to_user_id",status.getInReplyToUserId());
+		tweet.put("in_reply_to_screen_name",status.getInReplyToScreenName());
+		twitterCollection.insert(tweet);
+		SolrUpdate.update();
 	}
 
 	@Override
